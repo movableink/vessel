@@ -1,0 +1,6 @@
+.lein-*
+/data
+/logs
+/manifests
+resources/
+target/

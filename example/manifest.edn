@@ -1,0 +1,53 @@
+{
+  :env                "test"
+  :pallet-config      :test-aws
+  :deploy-hardware-id "m1.large"
+  :deploy-jvm-memory  6
+  :input-bucket       "vessel-test-data" ;; Change this to a bucket you control
+  :deploy-version     "0.4.0"
+  :deploy-jar         ["vessel-" :deploy-version "-SNAPSHOT-standalone.jar"]
+  :processing-dir     "example/data/processing"
+  :input-dir          "example/data/input"
+  :output-dir         "example/data/output"
+  :input-prefix       ["survey" :env "data" :batch "part-"]
+  :input-file-prefix  "part-r-"
+  :log-destination    [:input-bucket]
+
+  :input-row [
+    { :student_uuid   1 }
+    { :class_id     nil }
+    { :timestamp      2 }
+    { :category     nil }
+    { :completed      0 }
+    { :short          5 }
+    { :int            4 }
+    { :long           3 }
+  ]
+
+  :ffns [
+
+    (defn file-number
+      [file-name]
+      (string/replace file-name (deref input-file-prefix) ""))
+
+    (defn output-path
+      [cols file-path file-key]
+      (str
+        (deref output-dir)
+        "/"
+        "classes"
+        "/"
+        (nth cols (.indexOf (deref input-row) :class_id) "class_id")
+        "/"
+        (nth cols (.indexOf (deref input-row) :category) "category")
+        "_"
+        file-key
+        "-"
+        (file-number (fs/base-name file-path))
+        ".csv"))
+
+    (def input-delimiter
+      ",")
+
+  ]
+}
